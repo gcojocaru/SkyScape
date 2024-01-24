@@ -68,7 +68,7 @@ final class TodaysWeatherViewModel: TodaysWeatherViewModelContentable {
                 rain: "\(currentWeather.precip_mm)%",
                 wind: "\(currentWeather.wind_kph) km/h",
                 weatherCondition: WeatherConditionType(rawValue: currentWeather.condition.code)!,
-                todaysDate: TodaysWeatherViewModel.getCurrentDateFormatted()
+                todaysDate: DateFormatterService.shared.format(date: Date(), with: .dayMonthDayOfWeek)
             )
             await MainActor.run {
                 state = .success(todaysWeather)
@@ -81,16 +81,5 @@ final class TodaysWeatherViewModel: TodaysWeatherViewModelContentable {
     private func formatTemperature(_ value: Double, suffix: String = "") -> String {
         return String(format: "%g%@", value, suffix)
     }
-    
-    private static func getCurrentDateFormatted() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = DateFormat.fullDate.rawValue
-        return dateFormatter.string(from: Date())
-    }
 }
 
-extension TodaysWeatherViewModel {
-    private enum DateFormat: String {
-        case fullDate = "d MMMM, EEEE"
-    }
-}

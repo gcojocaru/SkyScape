@@ -8,56 +8,44 @@
 import Foundation
 import Combine
 
-final class HourlyForecastViewModel: ObservableObject {
-    let weatherService: WeatherService
-    @Published var hoursWeather: [HourlyForecast] = []
+protocol HourlyForecastViewModelProtocol {
+    var hoursWeather: [HourlyForecast] { get }
+    func getTwelveHourForecast() async
+    func getCurrentHourIndex() -> Int?
+}
+
+
+@Observable
+final class HourlyForecastViewModel: HourlyForecastViewModelProtocol {
+    
+    private let weatherService: WeatherService
+    var hoursWeather: [HourlyForecast] = []
     
     init(weatherService: WeatherService) {
         self.weatherService = weatherService
         
     }
     
-    func loadForecast() {
-        Task {
-            await getTwelveHourForecast()
-        }
-    }
-    
     func getTwelveHourForecast() async {
         do {
-            let currentDate = getCurrentDateString()
+            let currentDate = DateFormatterService.shared.format(date: Date(), with: .dateOnly)
             if let hours = try await weatherService.fetchWeatherForecast(forCity: "Chisinau", date: currentDate) {
                 await updateHoursWeather(with: hours)
             }
         } catch {
             print("Error fetching forecast: \(error)")
-            // Handle the error appropriately
+            // Silent error handling, since we don't need to display anything if there is an error
         }
     }
     
     func getCurrentHourIndex() -> Int? {
-        let currentHour = getCurrentHourString()
+        let currentHour = DateFormatterService.shared.format(date: Date(), with: .hourOnly)
         return hoursWeather.firstIndex(where: { $0.time.extractHourAndMinute() == currentHour })
     }
-    
-    private func getCurrentDateString() -> String {
-        let now = Date()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"  // Adjust the format to match your API requirements
-        return dateFormatter.string(from: now)
-    }
-    
     
     private func updateHoursWeather(with hours: [HourlyForecast]) async {
         await MainActor.run {
             self.hoursWeather = hours
         }
-    }
-    
-    private func getCurrentHourString() -> String {
-        let now = Date()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:00"
-        return dateFormatter.string(from: now)
     }
 }

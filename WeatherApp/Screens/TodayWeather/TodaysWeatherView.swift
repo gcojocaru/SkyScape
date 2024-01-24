@@ -10,7 +10,7 @@ import SwiftUI
 // Main Weather View
 struct TodaysWeatherView<ViewModel>: View where ViewModel: TodaysWeatherViewModelContentable {
     
-    let viewModel: ViewModel
+    @State var viewModel: ViewModel
     
     var body: some View {
         ZStack {

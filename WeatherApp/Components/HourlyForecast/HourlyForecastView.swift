@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct HourlyForecastView<ViewModel>: View where ViewModel: HourlyForecastViewModel {
-    @ObservedObject var viewModel: ViewModel
+struct HourlyForecastView<ViewModel>: View where ViewModel: HourlyForecastViewModelProtocol {
+    @State var viewModel: ViewModel
     @State private var scrollToHourIndex: Int? // The index to scroll to
     
     var body: some View {
